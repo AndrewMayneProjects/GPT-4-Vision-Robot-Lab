@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Robot Scene</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            background-color: rgb(21, 21, 21);
+        }
+
+        h1 {
+            font-family: "VT323", monospace;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 36px;
+            color: white;
+        }
+
+
+
+        .container {
+            width: 800px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            width: 800px;
+            height: 600px;
+        }
+
+        #controls {
+            justify-content: center;
+            padding-left: 20px;
+            /* Add left padding */
+            padding-right: 20px;
+            /* Add right padding */
+        }
+
+        /* HTML: <div class="loader"></div> */
+        .loader {
+            margin: auto;
+            margin-top: 10px;
+            width: 60px;
+            aspect-ratio: 4;
+            background: radial-gradient(circle closest-side, #ffffff 90%, #d4d4d400) 0/calc(100%/3) 100% no-repeat;
+            animation: l2 1s steps(3) infinite;
+        }
+
+        @keyframes l2 {
+            to {
+                background-position: 150%
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>GPT-4 with Vision Robot Control Simulator</h1>
+        <div class="mb-4">
+            <div id="container"></div>
+        </div>
+        <div class="flex justify-center">
+            <div class="flex flex-col items-center w-1/2"> <input id="instructions" type="text"
+                    placeholder="Enter instructions (n,e,s,w)"
+                    class="mb-4 px-2 py-1 bg-black text-white border border-white" autocomplete="off">
+                <div id="controls" class="flex space-x-4">
+                    <div id="d-pad" class="grid grid-cols-3 grid-rows-3 gap-1">
+                        <div></div> <button id="upBtn"
+                            class="d-pad-btn bg-black text-white border border-white px-4 py-2">N</button>
+                        <div></div> <button id="leftBtn"
+                            class="d-pad-btn bg-black text-white border border-white px-4 py-2">W</button>
+                        <div></div> <button id="rightBtn"
+                            class="d-pad-btn bg-black text-white border border-white px-4 py-2">E</button>
+                        <div></div> <button id="downBtn"
+                            class="d-pad-btn bg-black text-white border border-white px-4 py-2">S</button>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center w-1/2 pl-5 pr-5">
+                <textarea id="captureText" rows="4"
+                    class="mb-4 px-2 py-1 bg-black text-white border border-white w-full"
+                    placeholder="Instructions...">Find the butter</textarea>
+
+                <div class="loader" hidden></div>
+                <button id="sendButton" class="bg-black text-white border border-white px-4 py-2 w-full">Send to GPT-4
+                    with Vision</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Set up the scene, camera, and renderer 
+        const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000); camera.position.set(10, 10, 10); camera.lookAt(0, 0, 0); const renderer = new THREE.WebGLRenderer(); renderer.setSize(800, 600); document.getElementById('container').appendChild(renderer.domElement);
+        // Enable zooming and panning with the mouse 
+        const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.screenSpacePanning = false; controls.minDistance = 5; controls.maxDistance = 50;
+        // Create the grid floor 
+        const gridSize = 10; const gridDivisions = 10; const gridHelper = new THREE.GridHelper(gridSize, gridDivisions); scene.add(gridHelper);
+
+        let butterFound = false;
+        let searchAttempts = 5;
+
+        // Add cardinal direction labels to the plane
+        const loader = new THREE.FontLoader();
+        const labelDistance = 6;
+
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textMaterial = new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(createTextCanvas('N', font)),
+                sizeAttenuation: false
+            });
+            const textSprite = new THREE.Sprite(textMaterial);
+            textSprite.scale.set(0.5, 0.5, 1);
+            textSprite.position.set(0, 0.1, -labelDistance);
+            scene.add(textSprite);
+        });
+
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textMaterial = new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(createTextCanvas('S', font)),
+                sizeAttenuation: false
+            });
+            const textSprite = new THREE.Sprite(textMaterial);
+            textSprite.scale.set(0.5, 0.5, 1);
+            textSprite.position.set(0, 0.1, labelDistance);
+            scene.add(textSprite);
+        });
+
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textMaterial = new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(createTextCanvas('W', font)),
+                sizeAttenuation: false
+            });
+            const textSprite = new THREE.Sprite(textMaterial);
+            textSprite.scale.set(0.5, 0.5, 1);
+            textSprite.position.set(-labelDistance, 0.1, 0);
+            scene.add(textSprite);
+        });
+
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textMaterial = new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(createTextCanvas('E', font)),
+                sizeAttenuation: false
+            });
+            const textSprite = new THREE.Sprite(textMaterial);
+            textSprite.scale.set(0.5, 0.5, 1);
+            textSprite.position.set(labelDistance, 0.1, 0);
+            scene.add(textSprite);
+        });
+
+        // Helper function to create a canvas texture from text
+        function createTextCanvas(text, font) {
+            console.log(font.data.familyName)
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const size = 300;
+            canvas.width = size;
+            canvas.height = size;
+            context.fillStyle = '#ffffff';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.font = `50px Helvetica`;
+            context.fillText(text, size / 2, size / 2);
+            return canvas;
+        }
+
+        // Load the robot GLB model 
+        let robot;
+        const gltfLoader = new THREE.GLTFLoader();
+        let robotScale = 3;
+        gltfLoader.load('static/robot.glb', function (gltf) {
+            robot = gltf.scene; robot.scale.set(robotScale, robotScale, robotScale); robot.position.y = robotScale / 2;
+            // Move the robot up half its height 
+            scene.add(robot);
+        });
+
+
+
+        // Load the butter GLB model
+        let butter;
+        const butterScale = 2;
+        gltfLoader.load('static/butter.glb', function (gltf) {
+            butter = gltf.scene;
+            butter.scale.set(butterScale, butterScale, butterScale);
+            butter.position.set(4, 0.5, 3); // Position the butter
+            scene.add(butter);
+        });
+
+
+
+        function checkCollision(object1, object2) {
+            const box1 = new THREE.Box3().setFromObject(object1);
+            const box2 = new THREE.Box3().setFromObject(object2);
+            return box1.intersectsBox(box2);
+        }
+
+
+
+        // Add an Ambient Light 
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        // soft white light 
+        scene.add(ambientLight);
+        // Add a Directional Light 
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1); directionalLight.position.set(5, 10, 5);
+        // Position the light 
+        scene.add(directionalLight);
+        // Function to animate robot movement 
+        function moveRobotTo(newPosition, direction) {
+            const duration = 1000;
+            //Movement duration in milliseconds 
+            const start = { x: robot.position.x, z: robot.position.z };
+            const end = { x: newPosition.x, z: newPosition.z };
+            const tween = new TWEEN.Tween(start).to(end, duration).onUpdate(function () { robot.position.x = start.x; robot.position.z = start.z; }).onComplete(function () { robot.lookAt(new THREE.Vector3(end.x, robot.position.y, end.z)); }).start();
+            // Rotate robot to face direction of travel 
+            switch (direction) { case 'n': robot.rotation.y = Math.PI / 2; break; case 's': robot.rotation.y = -Math.PI / 2; break; case 'w': robot.rotation.y = Math.PI; break; case 'e': robot.rotation.y = 0; break; }
+        }
+        // D-pad Controls 
+        document.getElementById('upBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x, z: robot.position.z - 1 }, 'n'); }); document.getElementById('downBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x, z: robot.position.z + 1 }, 's'); }); document.getElementById('leftBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x - 1, z: robot.position.z }, 'w'); }); document.getElementById('rightBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x + 1, z: robot.position.z }, 'e'); });
+        // Process instructions from input box 
+        document.getElementById('instructions').addEventListener('change', function (event) {
+            const instructions = event.target.value.toLowerCase().split(',');
+            moveRobot(instructions)
+        });
+
+        function moveRobot(instructions) {
+            let currentPosition = { x: robot.position.x, z: robot.position.z };
+            instructions.forEach((instruction, index) => {
+                setTimeout(() => {
+                    switch (instruction) {
+                        case 'n': currentPosition.z -= 1;
+                            break; case 's': currentPosition.z += 1;
+                            break; case 'w': currentPosition.x -= 1;
+                            break; case 'e': currentPosition.x += 1;
+                            break;
+                    } moveRobotTo(currentPosition, instruction);
+                }, index * 1000);
+            });
+        }
+
+
+
+        // Render loop 
+        let collisionDetected = false;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+            controls.update();
+            renderer.render(scene, camera);
+
+            if (robot && butter && !collisionDetected) {
+                if (checkCollision(robot, butter)) {
+                    // Collision detected, trigger the event
+                    console.log("Robot touched the butter!");
+                    collisionDetected = true;
+                    butterFound = true;
+                    alert("The robot found the butter!")
+                    // Add your desired actions here
+                }
+            }
+        }
+        
+        
+        animate();
+
+
+
+        // Array to store the captured data (images and text)
+        let capturedData = [];
+
+        // Capture Image Button
+        document.getElementById('sendButton').addEventListener('click', function () {
+            getInstructions();
+        })
+
+
+        async function getInstructions() {
+
+            searchAttempts = searchAttempts - 1
+
+            capturedData = []
+
+            // Render the scene to the canvas
+            renderer.render(scene, camera);
+
+            const dataURL = renderer.domElement.toDataURL('image/png');
+            const captureText = document.getElementById('captureText').value;
+
+            const loader = document.querySelector('.loader');
+            const sendButton = document.getElementById('sendButton');
+
+
+            // Show the loader and hide the send button
+            loader.hidden = false;
+            sendButton.hidden = true;
+
+
+            const data = {
+                image: dataURL,
+                text: captureText,
+                //  directions: directions // Add directions returned from the API
+            };
+
+            capturedData.push(data);
+
+            if (capturedData.length > 3) {
+                capturedData.shift();
+            }
+
+            try {
+                const response = await fetch("/robot", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(capturedData), // Include both the image and the prompt in the request body
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Success:", data);
+                    // Handle success (e.g., display a message or process returned data)
+
+                    directions = data.directions.join(",").toLowerCase()
+
+                    console.log(directions)
+
+                    moveRobot(data.directions);
+
+                    if( searchAttempts > 0 && butterFound === false){
+                        getInstructions()
+                    }
+
+                    // document.getElementById("explanation").innerText = data.explanation;
+                } else {
+                    console.error("Error uploading image and prompt:", response.status);
+                }
+            } catch (error) {
+                console.error("Error uploading image and prompt:", error);
+            } finally {
+                // Hide the loader and show the send button
+                loader.hidden = true;
+                sendButton.hidden = false;
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
