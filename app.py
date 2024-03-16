@@ -103,6 +103,9 @@ def getCompletion(user_prompt_data):
                 "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
             }
             content.append(img)
+            
+            
+            os.remove(item["image"])
 
     api_key = os.environ.get("OPENAI_API_KEY")
 
