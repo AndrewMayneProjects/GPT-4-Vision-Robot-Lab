@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Robot Scene</title>
+    <title>GPT-4 with Vision Robot Control Simulator</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +23,7 @@
             font-family: "VT323", monospace;
             font-weight: 400;
             font-style: normal;
-            font-size: 36px;
+            font-size: 44px;
             color: white;
         }
 
@@ -116,7 +116,7 @@
         const gridSize = 10; const gridDivisions = 10; const gridHelper = new THREE.GridHelper(gridSize, gridDivisions); scene.add(gridHelper);
 
         let butterFound = false;
-        let searchAttempts = 5;
+        let searchAttempts = 1;
 
         // Add cardinal direction labels to the plane
         const loader = new THREE.FontLoader();
@@ -187,8 +187,15 @@
         const gltfLoader = new THREE.GLTFLoader();
         let robotScale = 3;
         gltfLoader.load('static/robot.glb', function (gltf) {
-            robot = gltf.scene; robot.scale.set(robotScale, robotScale, robotScale); robot.position.y = robotScale / 2;
-            // Move the robot up half its height 
+            robot = gltf.scene; 
+            robot.scale.set(robotScale, robotScale, robotScale); 
+            robot.position.y = robotScale / 2;
+
+            robot.position.x = -2
+            robot.position.z = -2
+
+            // robot.position.set(4, 0.5, 2);
+
             scene.add(robot);
         });
 
@@ -202,6 +209,16 @@
             butter.scale.set(butterScale, butterScale, butterScale);
             butter.position.set(4, 0.5, 3); // Position the butter
             scene.add(butter);
+        });
+
+
+        let mug;
+        const mugScale = 15;
+        gltfLoader.load('static/mug.glb', function (gltf) {
+            mug = gltf.scene;
+            mug.scale.set(mugScale, mugScale, mugScale);
+            mug.position.set(-4, .75, 1); // Position the mug
+            scene.add(mug);
         });
 
 
