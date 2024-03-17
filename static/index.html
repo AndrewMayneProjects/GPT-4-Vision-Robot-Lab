@@ -2,153 +2,106 @@
 <html>
 
 <head>
-    <title>GPT-4 with Vision Robot Control Simulator</title>
+    <title>GPT-4 with Vision Robot Simulator</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: "VT323", monospace;
-            background-color: rgb(21, 21, 21);
-        }
-
-        h1 {
-            font-family: "VT323", monospace;
-            font-weight: 400;
-            font-style: normal;
-            font-size: 44px;
-            color: white;
-        }
-
-
-        .info-text {
-            font-family: "VT323", monospace;
-        }
-
-
-
-        .container {
-            width: 800px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #container {
-            position: relative;
-            width: 800px;
-            height: 600px;
-
-        }
-
-
-        #robotCamera {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 200px;
-            height: 150px;
-            border: 2px solid white;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        #robotCamera canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        #robotLabel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 18px;
-            color: white;
-            z-index: 2;
-        }
-
-        #robotViewToggle {
-            margin-left: 20px;
-        }
-
-        canvas {
-            width: 800px;
-            height: 600px;
-            border: 1px solid white;
-        }
-
-        #controls {
-            justify-content: center;
-            padding-left: 20px;
-            /* Add left padding */
-            padding-right: 20px;
-            /* Add right padding */
-        }
-
-        input:checked ~ .dot {
-            transform: translateX(100%);
-            background-color: #f4faff;
-        }
-        input:checked ~ div {
-            background-color: #3d3d3d;
-        }
-
-        /* HTML: <div class="loader"></div> */
-        .loader {
-            margin: auto;
-            margin-top: 10px;
-            width: 60px;
-            aspect-ratio: 4;
-            background: radial-gradient(circle closest-side, #ffffff 90%, #d4d4d400) 0/calc(100%/3) 100% no-repeat;
-            animation: l2 1s steps(3) infinite;
-        }
-
-        @keyframes l2 {
-            to {
-                background-position: 150%
-            }
-        }
-    </style>
+    <link href="static/styles.css" rel="stylesheet">
+   
 </head>
 
 <body>
     <div class="container">
-        <h1>GPT-4 with Vision Robot Control Simulator</h1>
+        <h1>GPT-4 with Vision Robot Simulator</h1>
 
         <div class="mb-4">
             <div id="container">
+                <div id="messages">Bot: What is my purpose?</div>
+                <div id="telemetry" class="info-text">Bot is facing East</div>
                 <div id="robotCamera">
                     <div id="robotLabel" class="info-text">Robot POV</div>
                 </div>
             </div>
         </div>
-        <div style="display: flex; flex-direction: row; width: 800px;" >
 
-            <div class="left-controls" style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 400px;">
-                <div class="view-controls" style="width:100%; margin: auto; align-items: center;">
- 
-           
-                    <label for="robotViewToggle" class="flex items-center cursor-pointer">
-                      <div class="relative">
+
+        <div style="display: flex;flex-direction: row;justify-content: space-between;gap: 10px;padding: 10px">
+
+            <div>
+
+                <label for="robotMessagesToggle" class="flex items-center cursor-pointer">
+                    <span class="ml-3 text-gray-300 font-medium" style="margin-right: 8px;">Bot messages</span>
+                    <div class="relative">
+                        <input type="checkbox" id="robotMessagesToggle" class="sr-only" />
+                        <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
+                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                    </div>
+
+                </label>
+            </div>
+
+
+            <div>
+                <label for="robotViewToggle" class="flex items-center cursor-pointer">
+                    <span class="ml-3 text-gray-300 font-medium" style="margin-right: 8px;">HUD</span>
+                    <div class="relative">
                         <input type="checkbox" id="robotViewToggle" class="sr-only" />
                         <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
                         <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                      </div>
-                      <span class="ml-3 text-gray-300 font-medium">Robot View</span>
-                    </label>
+                    </div>
 
-                </div>
-
+                </label>
+            </div>
 
 
-                <div class="flex flex-col items-center w-1/2"> <input id="instructions" type="text"
+            <div>
+
+                <label for="robotTelemetryToggle" class="flex items-center cursor-pointer">
+                    <span class="ml-3 text-gray-300 font-medium" style="margin-right: 8px;">Telemetry</span>
+                    <div class="relative">
+                        <input type="checkbox" id="robotTelemetryToggle" class="sr-only" />
+                        <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
+                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                    </div>
+
+                </label>
+            </div>
+
+
+            <div>
+                <label for="switchViewToggle" class="flex items-center cursor-pointer">
+                    <span class="ml-3 text-gray-300 font-medium" style="margin-right: 8px;">Robot POV</span>
+                    <div class="relative">
+                        <input type="checkbox" id="switchViewToggle" class="sr-only" />
+                        <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
+                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                    </div>
+
+                </label>
+            </div>
+
+
+
+            <div>
+                <label for="searchAttempts" class="text-gray-300 font-medium">Search Attempts:</label>
+                <input type="number" id="searchAttempts" class="border border-gray-300 px-2 py-1 rounded"
+                    style="width:50px;margin-bottom: 15px;" min="0" value="7">
+            </div>
+        
+        
+        
+        </div>
+        <div style="display: flex; flex-direction: row; width: 800px;">
+
+            <div class="left-controls"
+                style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 400px;margin-top:8px">
+
+
+                <div class="flex flex-col items-center w-1/2"> 
+                    
+                    <input id="instructions" type="text"
                         placeholder="Enter instructions (n,e,s,w)" style="width:300px"
                         class="mb-4 px-2 py-1 bg-black text-white border border-white" autocomplete="off">
                     <div id="controls" class="flex space-x-4">
@@ -173,19 +126,21 @@
 
             <div class="flex flex-col items-center w-1/2 pl-5 pr-5">
 
-                <div class="ml-4">
-                    <label for="searchAttempts" class="text-gray-700 font-medium">Search Attempts:</label>
-                    <input type="number" id="searchAttempts" class="border border-gray-300 px-2 py-1 rounded" min="1" value="5">
-                </div>
-
-
                 <textarea id="captureText" rows="4"
-                    class="mb-4 px-2 py-1 bg-black text-white border border-white w-full"
+                    class="mb-4 px-2 py-1 bg-black text-white border border-white w-full" style="margin-top: 8px;"
                     placeholder="Instructions...">Find the butter</textarea>
 
-                <div class="loader" hidden></div>
-                <button id="sendButton" class="bg-black text-white border border-white px-4 py-2 w-full">Send to GPT-4
-                    with Vision</button>
+
+                <input id="telemetryData" class="mb-4 px-2 py-1 bg-black text-white border border-white" style="width: 100%;" placeholder="Telemetry data" value="Bot is facing East">
+
+                <div style="height: 100px; width: 100%;margin-top: 6px;">
+
+
+                    <div class="loader" hidden></div>
+                    <button id="sendButton" class="bg-black text-white border border-white px-4 py-2 w-full">Send to
+                        GPT-4
+                        with Vision</button>
+                </div>
             </div>
         </div>
     </div>
@@ -194,387 +149,9 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        // Set up the scene, camera, and renderer 
-        const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000);
-        camera.position.set(10, 10, 10);
-        camera.lookAt(0, 0, 0);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(800, 600);
-        document.getElementById('container').appendChild(renderer.domElement);
-
-
-        // Enable zooming and panning with the mouse 
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 50;
-
-        // Create the grid floor 
-        const gridSize = 10; const gridDivisions = 10; const gridHelper = new THREE.GridHelper(gridSize, gridDivisions); scene.add(gridHelper);
-
-        let butterFound = false;
-        let searchAttempts;
-        let robotViewEnabled = true;
-
-        // Robot View Toggle
-        document.getElementById('robotViewToggle').addEventListener('click', function () {
-            robotViewEnabled = !robotViewEnabled;
-            document.getElementById('robotCamera').style.display = robotViewEnabled ? 'block' : 'none';
-        });
-
-        // Add cardinal direction labels to the plane
-        const loader = new THREE.FontLoader();
-        const labelDistance = 6;
-
-        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textMaterial = new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(createTextCanvas('N', font)),
-                sizeAttenuation: false
-            });
-            const textSprite = new THREE.Sprite(textMaterial);
-            textSprite.scale.set(0.5, 0.5, 1);
-            textSprite.position.set(0, 0.1, -labelDistance);
-            scene.add(textSprite);
-        });
-
-        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textMaterial = new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(createTextCanvas('S', font)),
-                sizeAttenuation: false
-            });
-            const textSprite = new THREE.Sprite(textMaterial);
-            textSprite.scale.set(0.5, 0.5, 1);
-            textSprite.position.set(0, 0.1, labelDistance);
-            scene.add(textSprite);
-        });
-
-        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textMaterial = new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(createTextCanvas('W', font)),
-                sizeAttenuation: false
-            });
-            const textSprite = new THREE.Sprite(textMaterial);
-            textSprite.scale.set(0.5, 0.5, 1);
-            textSprite.position.set(-labelDistance, 0.1, 0);
-            scene.add(textSprite);
-        });
-
-        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textMaterial = new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(createTextCanvas('E', font)),
-                sizeAttenuation: false
-            });
-            const textSprite = new THREE.Sprite(textMaterial);
-            textSprite.scale.set(0.5, 0.5, 1);
-            textSprite.position.set(labelDistance, 0.1, 0);
-            scene.add(textSprite);
-        });
-
-        // Helper function to create a canvas texture from text
-        function createTextCanvas(text, font) {
-            console.log(font.data.familyName)
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            const size = 300;
-            canvas.width = size;
-            canvas.height = size;
-            context.fillStyle = '#ffffff';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.font = `50px Helvetica`;
-            context.fillText(text, size / 2, size / 2);
-            return canvas;
-        }
-
-
-        // Robot's POV camera
-        const robotCameraFOV = 75;
-        const robotCameraAspect = 200 / 150; // Adjust the aspect ratio to fit inside the main view
-        const robotCameraNear = 0.1;
-        const robotCameraFar = 1000;
-        const robotCamera = new THREE.PerspectiveCamera(robotCameraFOV, robotCameraAspect, robotCameraNear, robotCameraFar);
-        const robotViewWidth = 200; // Adjust the width of the robot's view
-        const robotViewHeight = 150; // Adjust the height of the robot's view
-        const robotRenderer = new THREE.WebGLRenderer();
-        robotRenderer.setSize(robotViewWidth, robotViewHeight);
-        document.getElementById('robotCamera').appendChild(robotRenderer.domElement);
-
-
-        // Load the robot GLB model 
-        let robot;
-        const gltfLoader = new THREE.GLTFLoader();
-        let robotScale = 3;
-        gltfLoader.load('static/robot.glb', function (gltf) {
-            robot = gltf.scene;
-            robot.scale.set(robotScale, robotScale, robotScale);
-            robot.position.y = robotScale / 2;
-
-            robot.position.x = -2
-            robot.position.z = -2
-
-            // robot.position.set(4, 0.5, 2);
-            // Attach the robot camera to the robot
-            robot.add(robotCamera);
-            // Robot camera position variables
-            const robotCameraX = 0.4;
-            const robotCameraY = 0;
-            const robotCameraZ = 0;
-            robotCamera.position.set(robotCameraX, robotCameraY, robotCameraZ);
-
-            // Make the robot camera parallel to the ground
-            robotCamera.rotation.x = 0;
-            robotCamera.rotation.y = Math.PI / -2;
-            scene.add(robot);
-        });
-
-
-
-        // Load the butter GLB model
-        let butter;
-        const butterScale = 2;
-        gltfLoader.load('static/butter.glb', function (gltf) {
-            butter = gltf.scene;
-            butter.scale.set(butterScale, butterScale, butterScale);
-            butter.position.set(4, 0.5, 3); // Position the butter
-            scene.add(butter);
-        });
-
-
-        let mug;
-        const mugScale = 15;
-        gltfLoader.load('static/mug.glb', function (gltf) {
-            mug = gltf.scene;
-            mug.scale.set(mugScale, mugScale, mugScale);
-            mug.position.set(-4, .75, 1); // Position the mug
-            scene.add(mug);
-        });
-
-
-
-        function checkCollision(object1, object2) {
-            const box1 = new THREE.Box3().setFromObject(object1);
-            const box2 = new THREE.Box3().setFromObject(object2);
-            return box1.intersectsBox(box2);
-        }
-
-
-
-
-        // Add an Ambient Light 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-
-        // soft white light 
-        scene.add(ambientLight);
-
-        // Add a Directional Light 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1); directionalLight.position.set(5, 10, 5);
-
-        // Position the light 
-        scene.add(directionalLight);
-
-        // Function to animate robot movement 
-        function moveRobotTo(newPosition, direction) {
-            const duration = 1000;
-            //Movement duration in milliseconds 
-            const start = { x: robot.position.x, z: robot.position.z };
-            const end = { x: newPosition.x, z: newPosition.z };
-            const tween = new TWEEN.Tween(start).to(end, duration).onUpdate(function () {
-                robot.position.x = start.x;
-                robot.position.z = start.z;
-            }).start();
-
-            // Rotate robot to face direction of travel 
-            switch (direction) {
-                case 'n':
-                    robot.rotation.y = Math.PI / 2;
-                    break;
-                case 's':
-                    robot.rotation.y = -Math.PI / 2;
-                    break;
-                case 'w':
-                    robot.rotation.y = Math.PI;
-                    break;
-                case 'e':
-                    robot.rotation.y = 0;
-                    break;
-            }
-        }
-
-
-        // D-pad Controls 
-        document.getElementById('upBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x, z: robot.position.z - 1 }, 'n'); }); document.getElementById('downBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x, z: robot.position.z + 1 }, 's'); }); document.getElementById('leftBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x - 1, z: robot.position.z }, 'w'); }); document.getElementById('rightBtn').addEventListener('click', function () { moveRobotTo({ x: robot.position.x + 1, z: robot.position.z }, 'e'); });
-
-        // Process instructions from input box 
-        document.getElementById('instructions').addEventListener('change', function (event) {
-            const instructions = event.target.value.toLowerCase().split(',');
-            moveRobot(instructions)
-        });
-
-        function moveRobot(instructions) {
-            let currentPosition = { x: robot.position.x, z: robot.position.z };
-            instructions.forEach((instruction, index) => {
-                setTimeout(() => {
-                    switch (instruction) {
-                        case 'n':
-                            currentPosition.z -= 1;
-                            break;
-                        case 's':
-                            currentPosition.z += 1;
-                            break;
-                        case 'w':
-                            currentPosition.x -= 1;
-                            break;
-                        case 'e':
-                            currentPosition.x += 1;
-                            break;
-                    }
-                    moveRobotTo(currentPosition, instruction);
-                }, index * 1000);
-            });
-        }
-
-
-        // Render loop 
-        let collisionDetected = false;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            TWEEN.update();
-            controls.update();
-            renderer.render(scene, camera);
-
-
-            robotRenderer.render(scene, robotCamera);
-
-            if (robot && butter && !collisionDetected) {
-                if (checkCollision(robot, butter)) {
-                    // Collision detected, trigger the event
-                    console.log("Robot touched the butter!");
-                    collisionDetected = true;
-                    butterFound = true;
-                    alert("The robot found the butter!")
-                    // Add your desired actions here
-                }
-            }
-        }
-
-
-        animate();
-
-
-
-        // Array to store the captured data (images and text)
-        let capturedData = [];
-
-        // Capture Image Button
-        document.getElementById('sendButton').addEventListener('click', function () {
-            getInstructions();
-        })
-
-
-        async function getInstructions() {
-      
-            document.getElementById('searchAttempts').value -= 1;
-            searchAttempts = parseInt(document.getElementById('searchAttempts').value);
-
-            capturedData = [];
-
-            // Create an offscreen canvas with the desired dimensions
-            const offscreenCanvas = new OffscreenCanvas(800, 600);
-            const offscreenContext = offscreenCanvas.getContext('2d');
-
-            // Render the main view onto the offscreen canvas
-            renderer.render(scene, camera);
-            offscreenContext.drawImage(renderer.domElement, 0, 0);
-
-            if (robotViewEnabled) {
-                // Render the robot view onto the offscreen canvas
-                robotRenderer.render(scene, robotCamera);
-                const robotViewWidth = 200;
-                const robotViewHeight = 150;
-                const robotViewX = 800 - robotViewWidth - 20;
-                const robotViewY = 600 - robotViewHeight - 20;
-
-                // Draw a border around the robot view
-                offscreenContext.strokeStyle = 'white';
-                offscreenContext.lineWidth = 2;
-                offscreenContext.strokeRect(robotViewX, robotViewY, robotViewWidth, robotViewHeight);
-
-                // Draw the robot view image
-                offscreenContext.drawImage(robotRenderer.domElement, robotViewX, robotViewY, robotViewWidth, robotViewHeight);
-            }
-
-            // Convert the offscreen canvas to a data URL
-            const dataURL = offscreenCanvas.convertToBlob().then(blob => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                return new Promise(resolve => {
-                    reader.onloadend = () => {
-                        resolve(reader.result);
-                    };
-                });
-            });
-
-            const captureText = document.getElementById('captureText').value;
-            const loader = document.querySelector('.loader');
-            const sendButton = document.getElementById('sendButton');
-
-            // Show the loader and hide the send button
-            loader.hidden = false;
-            sendButton.hidden = true;
-
-            const data = {
-                image: await dataURL,
-                text: captureText,
-                // directions: directions // Add directions returned from the API
-            };
-
-            capturedData.push(data);
-
-            if (capturedData.length > 3) {
-                capturedData.shift();
-            }
-
-            try {
-                const response = await fetch("/robot", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(capturedData), // Include both the image and the prompt in the request body
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("Success:", data);
-                    // Handle success (e.g., display a message or process returned data)
-
-                    directions = data.directions.join(",").toLowerCase();
-                    console.log(directions);
-                    moveRobot(data.directions);
-
-                    if (searchAttempts > 0 && butterFound === false) {
-                        getInstructions();
-                    }
-
-                    // document.getElementById("explanation").innerText = data.explanation;
-                } else {
-                    console.error("Error uploading image and prompt:", response.status);
-                }
-            } catch (error) {
-                console.error("Error uploading image and prompt:", error);
-            } finally {
-                // Hide the loader and show the send button
-                loader.hidden = true;
-                sendButton.hidden = false;
-            }
-        }
-
-
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/DragControls.js"></script>
+    <script src="static/script.js"></script>
+  
 </body>
 
 </html>
