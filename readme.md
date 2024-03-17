@@ -3,6 +3,24 @@ This project is a web-based 3D scene that allows you to control a robot and dete
 
 ![Example Image](Robot-Demo.gif)
 
+
+## How to use
+
+**Bot Messages**
+This shows you the reasoning process the AI is using to determine what route to take.
+
+**HUD**
+This shows the POV of the robot camera. When enabled this image is sent to the vision model.
+
+**Telemetry**
+Data about what direction the robot is facing and any object it might be colliding with. When enabled this is sent to the vision model.
+
+**Robot POV**
+When enabled this makes the robot camera the primary view and what is sent to the vision model.
+
+
+
+
 ## Features
 - Interactive 3D scene with a controllable robot and objects
 - Virtual D-pad for controlling the robot's movement

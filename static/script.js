@@ -8,7 +8,6 @@ let robotView = false;
 let sceneObjects = ["Mug", "Butter", "Toaster", "Robot"];
 let collisionEvent;
 
-
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 800 / 600, 0.1, 1000);
 camera.position.set(10, 10, 10);
@@ -32,10 +31,14 @@ const gridHelper = new THREE.GridHelper(
   gridSize,
   gridDivisions,
   0xffffff,
-  0xffffff,
+  0xffffff
 );
 scene.add(gridHelper);
 
+// Reset Objects Button
+document.getElementById("resetButton").addEventListener("click", function () {
+  resetObjects();
+});
 
 // Robot View Toggle
 document
@@ -275,6 +278,103 @@ function createDragControls() {
   }
 }
 
+function resetObjects() {
+    const objectPositions = {};
+    const objectSizes = {};
+  
+    // Shuffle the sceneObjects array to randomize the order of object placement
+    const shuffledObjects = shuffleArray(sceneObjects);
+  
+    shuffledObjects.forEach((objectName) => {
+      const object = scene.getObjectByName(objectName);
+      if (object) {
+        let randomPosition;
+        let attempts = 0;
+        const maxAttempts = 100;
+  
+        // Calculate the object's size
+        const box = new THREE.Box3().setFromObject(object);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        objectSizes[objectName] = size;
+  
+        do {
+          randomPosition = generateRandomPosition();
+          attempts++;
+        } while (
+          checkCollisionWithObjects(object, randomPosition, objectPositions, objectSizes) &&
+          attempts < maxAttempts
+        );
+  
+        if (attempts < maxAttempts) {
+          object.position.set(randomPosition.x, randomPosition.y, randomPosition.z);
+          objectPositions[objectName] = randomPosition;
+  
+          // Reset robot rotation if the object is the robot
+          if (objectName === "Robot") {
+            object.rotation.y = Math.PI / -2;
+          }
+        } else {
+          console.log(`Failed to find a valid position for ${objectName} after ${maxAttempts} attempts.`);
+        }
+      }
+    });
+  }
+  
+  function shuffleArray(array) {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  }
+  
+  function generateRandomPosition() {
+    const min = -3;
+    const max = 3;
+    const x = Math.random() * (max - min) + min;
+    const z = Math.random() * (max - min) + min;
+    const y = 0.5; // Adjust this value to set the height of the objects
+    return { x, y, z };
+  }
+  
+  function checkCollisionWithObjects(
+    object,
+    position,
+    objectPositions,
+    objectSizes
+  ) {
+    const buffer = 0.5; // Adjust this value to control the minimum distance between objects
+  
+    for (const objectName of sceneObjects) {
+      if (
+        objectName !== object.name && // Exclude the current object from collision detection
+        objectPositions.hasOwnProperty(objectName)
+      ) {
+        const otherPosition = objectPositions[objectName];
+        const otherSize = objectSizes[objectName];
+  
+        const distance = Math.sqrt(
+          Math.pow(position.x - otherPosition.x, 2) +
+            Math.pow(position.z - otherPosition.z, 2)
+        );
+  
+        const minDistance =
+          (Math.max(object.scale.x, object.scale.z) +
+            Math.max(otherSize.x, otherSize.z)) /
+            2 +
+          buffer;
+  
+        if (distance < minDistance) {
+          console.log(`Collision detected between ${object.name} and ${objectName}`);
+          return true; // Collision detected
+        }
+      }
+    }
+  
+    return false; // No collision detected
+  }
 function checkCollision(object1, object2) {
   const box1 = new THREE.Box3().setFromObject(object1);
   const box2 = new THREE.Box3().setFromObject(object2);
@@ -307,7 +407,6 @@ function getDirectionLabel(rotation) {
 
 // Function to animate robot movement
 function moveRobotTo(newPosition, direction) {
-
   return new Promise((resolve, reject) => {
     const duration = 1000; // Movement duration in milliseconds
     const start = { x: robot.position.x, z: robot.position.z };
@@ -388,9 +487,7 @@ async function moveRobot(instructions) {
         break;
     }
 
- 
     await moveRobotTo(currentPosition, instruction);
-    
   }
 }
 
@@ -528,7 +625,6 @@ async function getInstructions() {
     // Draw the label text
     offscreenContext.fillText(text, textX, textY);
   }
-
 
   offscreenContext.strokeStyle = "white";
   offscreenContext.lineWidth = 2;
