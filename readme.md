@@ -1,7 +1,7 @@
 # Robot Control and Item Detection with GPT-4 Vision
 This project is a web-based 3D scene that allows you to control a robot and detect items using GPT-4 with Vision. The robot can be moved using a virtual D-pad or by entering instructions in a text input field. The project uses Three.js for 3D rendering and includes features such as loading 3D models, capturing images of the scene, and sending data to a Flask server for item detection using GPT-4 with Vision.
 
-![Example Image](example.jpg)
+![Example Image](Robot-Demo.gif)
 
 ## Features
 - Interactive 3D scene with a controllable robot and objects
