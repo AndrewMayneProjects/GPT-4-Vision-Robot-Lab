@@ -1,4 +1,14 @@
 // Set up the scene, camera, and renderer
+let itemFound = false;
+let searchAttempts;
+let robotHUDViewEnabled = true;
+let messagesViewEnabled = true;
+let telemetryEnabled = true;
+let robotView = false;
+let sceneObjects = ["Mug", "Butter", "Toaster", "Robot"];
+let collisionEvent;
+
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 800 / 600, 0.1, 1000);
 camera.position.set(10, 10, 10);
@@ -21,18 +31,11 @@ const gridDivisions = 6;
 const gridHelper = new THREE.GridHelper(
   gridSize,
   gridDivisions,
-  0x0000ff,
-  0x0000ff
+  0xffffff,
+  0xffffff,
 );
 scene.add(gridHelper);
 
-let itemFound = false;
-let searchAttempts;
-let robotHUDViewEnabled = true;
-let messagesViewEnabled = true;
-let telemetryEnabled = true;
-let robotView = false;
-let sceneObjects = ['Mug', 'Butter', 'Toaster']
 
 // Robot View Toggle
 document
@@ -54,12 +57,11 @@ document
       : "none";
   });
 
-
 // robotTelemetryToggle
 document
   .getElementById("robotTelemetryToggle")
   .addEventListener("click", function () {
-   telemetryEnabled = !telemetryEnabled;
+    telemetryEnabled = !telemetryEnabled;
     document.getElementById("telemetry").style.display = telemetryEnabled
       ? "block"
       : "none";
@@ -157,7 +159,6 @@ loader.load(
 
 // Helper function to create a canvas texture from text
 function createTextCanvas(text, font) {
-  console.log(font.data.familyName);
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   const size = 300;
@@ -213,6 +214,7 @@ gltfLoader.load("static/objects/robot.glb", function (gltf) {
   // Make the robot camera parallel to the ground
   robotCamera.rotation.x = 0;
   robotCamera.rotation.y = Math.PI / -2;
+  robot.name = "Robot";
   scene.add(robot);
 });
 
@@ -242,15 +244,13 @@ gltfLoader.load("static/objects/mug.glb", function (gltf) {
 let toaster;
 const toasterScale = 15;
 gltfLoader.load("static/objects/toaster.glb", function (gltf) {
-    toaster = gltf.scene;
-    toaster.scale.set(toasterScale, toasterScale, toasterScale);
-    toaster.position.set(2.5, 0, -3); // Position the mug
-    toaster.name = "Toaster";
+  toaster = gltf.scene;
+  toaster.scale.set(toasterScale, toasterScale, toasterScale);
+  toaster.position.set(2.5, 0, -3); // Position the mug
+  toaster.name = "Toaster";
   scene.add(toaster);
   createDragControls();
 });
-
- 
 
 let dragControlsCreated = false;
 
@@ -298,7 +298,7 @@ function getDirectionLabel(rotation) {
   const directions = ["East", "North", "West", "South"];
   let index = Math.round(rotation / (Math.PI / 2)) % 4;
 
-  console.log(index);
+  // console.log(index);
   if (index == -1) {
     index = 3;
   }
@@ -307,11 +307,6 @@ function getDirectionLabel(rotation) {
 
 // Function to animate robot movement
 function moveRobotTo(newPosition, direction) {
-  // if (itemFound) {
-  //     return
-  // }
-
-  // document.getElementById("messages").innerText = "Bot: Moving " + direction;
 
   return new Promise((resolve, reject) => {
     const duration = 1000; // Movement duration in milliseconds
@@ -344,7 +339,8 @@ function moveRobotTo(newPosition, direction) {
         break;
     }
 
-    document.getElementById("telemetryData").value = "Bot is facing " + getDirectionLabel(robot.rotation.y);
+    document.getElementById("telemetryData").value =
+      "Bot is facing " + getDirectionLabel(robot.rotation.y);
     document.getElementById("telemetry").innerText =
       "Bot is facing " + getDirectionLabel(robot.rotation.y);
   });
@@ -375,7 +371,8 @@ document
 async function moveRobot(instructions) {
   let currentPosition = { x: robot.position.x, z: robot.position.z };
   for (const instruction of instructions) {
-    await moveRobotTo(currentPosition, instruction);
+    // console.log("instruction:", instruction)
+
     switch (instruction) {
       case "n":
         currentPosition.z -= 1;
@@ -390,6 +387,10 @@ async function moveRobot(instructions) {
         currentPosition.x += 1;
         break;
     }
+
+ 
+    await moveRobotTo(currentPosition, instruction);
+    
   }
 }
 
@@ -401,21 +402,29 @@ function animate() {
   TWEEN.update();
   controls.update();
   renderer.render(scene, camera);
-
   robotRenderer.render(scene, robotCamera);
 
   // Check collision with all objects in the scene
   scene.traverse(function (object) {
-    if (object !== robot && object.isMesh && !collisionDetected) {
+    if (object == undefined || !sceneObjects.includes(object.name)) {
+      return;
+    }
+
+    if (object !== robot && !object.isMesh && !collisionDetected) {
+      // if (object !== robot && object.isMesh && !collisionDetected) {
       if (checkCollision(robot, object)) {
         // Collision detected, trigger the event
-
-        if(sceneObjects.includes(object.name)){
+        if (sceneObjects.includes(object.name)) {
+          if (object.name !== collisionEvent) {
+            collisionEvent = object.name;
             console.log(`Robot touched the ${object.name}!`);
             collisionDetected = true;
             document.getElementById(
               "messages"
             ).innerText = `Bot: I found the ${object.name}!`;
+            document.getElementById("telemetryData").value +=
+              " | Bot touched " + object.name;
+          }
         }
       }
     }
@@ -480,8 +489,6 @@ async function getInstructions() {
   // Add robot direction to the offscreen canvas
   // offscreenContext.fillText(`Robot Facing: ${robotDirection}`, 10, 60);
 
-
-
   if (robotHUDViewEnabled) {
     // Render the robot view onto the offscreen canvas
     robotRenderer.render(scene, robotCamera);
@@ -495,22 +502,19 @@ async function getInstructions() {
     offscreenContext.lineWidth = 2;
 
     offscreenContext.drawImage(
-        robotRenderer.domElement,
-        robotViewX,
-        robotViewY,
-        robotViewWidth,
-        robotViewHeight
-      );
+      robotRenderer.domElement,
+      robotViewX,
+      robotViewY,
+      robotViewWidth,
+      robotViewHeight
+    );
 
-
-      offscreenContext.strokeRect(
-        robotViewX,
-        robotViewY,
-        robotViewWidth,
-        robotViewHeight
-      );
-
- 
+    offscreenContext.strokeRect(
+      robotViewX,
+      robotViewY,
+      robotViewWidth,
+      robotViewHeight
+    );
 
     // Set the style for the label
     offscreenContext.fillStyle = "white"; // Text color
@@ -525,18 +529,6 @@ async function getInstructions() {
     offscreenContext.fillText(text, textX, textY);
   }
 
-  // Load the static robot image
-//   const robotImage = new Image();
-//   robotImage.src = "static/robot.png";
-//   await new Promise((resolve) => {
-//     robotImage.onload = resolve;
-//   });
-
-  // Draw the static robot image in the lower left corner
-//   const robotImageWidth = 100;
-//   const robotImageHeight = 100;
-//   const robotImageX = 20;
-//   const robotImageY = 600 - robotImageHeight - 20;
 
   offscreenContext.strokeStyle = "white";
   offscreenContext.lineWidth = 2;
@@ -567,26 +559,23 @@ async function getInstructions() {
   loader.hidden = false;
   sendButton.hidden = true;
 
-
-  if(telemetryEnabled){
-    captureText += "\n" + document.getElementById("telemetryData").value
+  if (telemetryEnabled) {
+    captureText += "\n" + document.getElementById("telemetryData").value;
   }
 
   const data = {
     image: await dataURL,
     text: captureText,
-   //  previous_user_instruction: previous_user_instruction,
-   // previous_directions: previous_directions,
-   //  previous_explanation: previous_explanation,
+    //  previous_user_instruction: previous_user_instruction,
+    // previous_directions: previous_directions,
+    //  previous_explanation: previous_explanation,
   };
 
   previous_user_instruction = captureText;
 
-
-
   capturedData.push(data);
 
-  console.log("capturedData:", capturedData);
+  // console.log("capturedData:", capturedData);
 
   if (capturedData.length > 4) {
     capturedData.shift();
@@ -603,7 +592,7 @@ async function getInstructions() {
 
     if (response.ok) {
       const data = await response.json();
-      console.log("Success:", data);
+      // console.log("Success:", data);
       // Handle success (e.g., display a message or process returned data)
 
       directions = data.directions.join(",").toLowerCase();
@@ -617,6 +606,7 @@ async function getInstructions() {
       document.getElementById("messages").innerText =
         "Bot: " + data.explanation;
 
+      console.log("Directions:", data.directions);
       await moveRobot(data.directions);
 
       // Wait for animation to finish

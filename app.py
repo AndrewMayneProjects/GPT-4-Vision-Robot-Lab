@@ -44,6 +44,8 @@ def parseCompletion(text):
 Instructions like "s4" should be converted to s,s,s,s.
 
 Directions must be in this format: [w,w,w,s,s,]
+
+For an 8x8 map n,n,n,n,n,n,n will take you all the way from north to south
         
 Rewrite the explanation as if you are the robot making the decisions.
     
@@ -163,7 +165,7 @@ Acceptable direction format is n,w,e,s"
 
     json_data = response.json()
 
-    # print(json_data)
+    print(json_data)
 
     input_str = json_data["choices"][0]["message"]["content"]
     
