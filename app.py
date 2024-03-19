@@ -83,12 +83,15 @@ def getCompletion(user_prompt_data):
 
     user_text = ""
     previous_directions = ""
+    image_detail = "auto"
 
     for item in user_prompt_data:
         if item["text"]:
             user_text += item["text"] + "\n\n###\n\n"
         if "previous_directions" in item:
             previous_directions = item["previous_directions"]
+        if item["image_detail"]:
+            image_detail = item["image_detail"]
 
     instruction = user_text  # + "\n\n" + previous_directions
 
@@ -109,7 +112,7 @@ def getCompletion(user_prompt_data):
                 "type": "image_url",
                 "image_url": {
                     "url": f"data:image/jpeg;base64,{base64_image}",
-                    "detail": "auto",
+                    "detail": image_detail,
                 },
             }
             content.append(img)
@@ -194,6 +197,7 @@ def handle_robot():
     for item in capturedData:
         image_data = item["image"]
         prompt_data = item["text"]
+        image_detail = item["detail"]
         # previous_directions = item["previous_directions"] 
 
         # Decode the base64-encoded image data
@@ -212,6 +216,7 @@ def handle_robot():
             {
                 "text": prompt_data,
                 "image": filepath,
+                "image_detail": image_detail
                # "previous_directions": previous_directions,
             }
         )

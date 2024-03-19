@@ -278,103 +278,109 @@ function createDragControls() {
   }
 }
 
-function resetObjects() {
-    const objectPositions = {};
-    const objectSizes = {};
-  
-    // Shuffle the sceneObjects array to randomize the order of object placement
-    const shuffledObjects = shuffleArray(sceneObjects);
-  
-    shuffledObjects.forEach((objectName) => {
-      const object = scene.getObjectByName(objectName);
-      if (object) {
-        let randomPosition;
-        let attempts = 0;
-        const maxAttempts = 100;
-  
-        // Calculate the object's size
-        const box = new THREE.Box3().setFromObject(object);
-        const size = new THREE.Vector3();
-        box.getSize(size);
-        objectSizes[objectName] = size;
-  
-        do {
-          randomPosition = generateRandomPosition();
-          attempts++;
-        } while (
-          checkCollisionWithObjects(object, randomPosition, objectPositions, objectSizes) &&
-          attempts < maxAttempts
-        );
-  
-        if (attempts < maxAttempts) {
-          object.position.set(randomPosition.x, randomPosition.y, randomPosition.z);
-          objectPositions[objectName] = randomPosition;
-  
-          // Reset robot rotation if the object is the robot
-          if (objectName === "Robot") {
-            object.rotation.y = Math.PI / -2;
+ 
+    function resetObjects() {
+        const objectPositions = {};
+        const objectSizes = {};
+      
+        // Shuffle the sceneObjects array to randomize the order of object placement
+        const shuffledObjects = shuffleArray(sceneObjects);
+      
+        shuffledObjects.forEach((objectName) => {
+          const object = scene.getObjectByName(objectName);
+          if (object) {
+            let randomPosition;
+            let attempts = 0;
+            const maxAttempts = 100;
+      
+            // Calculate the object's size
+            const box = new THREE.Box3().setFromObject(object);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            objectSizes[objectName] = size;
+      
+            do {
+              randomPosition = generateRandomPosition();
+              attempts++;
+            } while (
+              checkCollisionWithObjects(object, randomPosition, objectPositions, objectSizes) &&
+              attempts < maxAttempts
+            );
+      
+            if (attempts < maxAttempts) {
+              // Keep the object's original y position
+              randomPosition.y = object.position.y;
+      
+              object.position.set(randomPosition.x, randomPosition.y, randomPosition.z);
+              objectPositions[objectName] = randomPosition;
+      
+              // Reset robot rotation if the object is the robot
+              if (objectName === "Robot") {
+                object.rotation.y = Math.PI / -2;
+              }
+            } else {
+              console.log(`Failed to find a valid position for ${objectName} after ${maxAttempts} attempts.`);
+            }
           }
-        } else {
-          console.log(`Failed to find a valid position for ${objectName} after ${maxAttempts} attempts.`);
-        }
+        });
       }
-    });
-  }
-  
-  function shuffleArray(array) {
-    const shuffledArray = [...array];
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-    }
-    return shuffledArray;
-  }
-  
-  function generateRandomPosition() {
-    const min = -3;
-    const max = 3;
-    const x = Math.random() * (max - min) + min;
-    const z = Math.random() * (max - min) + min;
-    const y = 0.5; // Adjust this value to set the height of the objects
-    return { x, y, z };
-  }
-  
-  function checkCollisionWithObjects(
-    object,
-    position,
-    objectPositions,
-    objectSizes
-  ) {
-    const buffer = 0.5; // Adjust this value to control the minimum distance between objects
-  
-    for (const objectName of sceneObjects) {
-      if (
-        objectName !== object.name && // Exclude the current object from collision detection
-        objectPositions.hasOwnProperty(objectName)
+      
+      function shuffleArray(array) {
+        const shuffledArray = [...array];
+        for (let i = shuffledArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+        }
+        return shuffledArray;
+      }
+      
+      function generateRandomPosition() {
+        const min = -3;
+        const max = 3;
+        const x = Math.random() * (max - min) + min;
+        const z = Math.random() * (max - min) + min;
+        return { x, y: 0, z }; // Set the y position to 0 (ground level)
+      }
+      
+      function checkCollisionWithObjects(
+        object,
+        position,
+        objectPositions,
+        objectSizes
       ) {
-        const otherPosition = objectPositions[objectName];
-        const otherSize = objectSizes[objectName];
-  
-        const distance = Math.sqrt(
-          Math.pow(position.x - otherPosition.x, 2) +
-            Math.pow(position.z - otherPosition.z, 2)
-        );
-  
-        const minDistance =
-          (Math.max(object.scale.x, object.scale.z) +
-            Math.max(otherSize.x, otherSize.z)) /
-            2 +
-          buffer;
-  
-        if (distance < minDistance) {
-          console.log(`Collision detected between ${object.name} and ${objectName}`);
-          return true; // Collision detected
+        const buffer = 0.5; // Adjust this value to control the minimum distance between objects
+      
+        for (const objectName of sceneObjects) {
+          if (
+            objectName !== object.name && // Exclude the current object from collision detection
+            objectPositions.hasOwnProperty(objectName)
+          ) {
+            const otherPosition = objectPositions[objectName];
+            const otherSize = objectSizes[objectName];
+      
+            const distance = Math.sqrt(
+              Math.pow(position.x - otherPosition.x, 2) +
+                Math.pow(position.z - otherPosition.z, 2)
+            );
+      
+            const minDistance =
+              (Math.max(object.scale.x, object.scale.z) +
+                Math.max(otherSize.x, otherSize.z)) /
+                2 +
+              buffer;
+      
+            if (distance < minDistance) {
+              console.log(`Collision detected between ${object.name} and ${objectName}`);
+              return true; // Collision detected
+            }
+          }
         }
+      
+        return false; // No collision detected
       }
-    }
-  
-    return false; // No collision detected
-  }
+
+
+
 function checkCollision(object1, object2) {
   const box1 = new THREE.Box3().setFromObject(object1);
   const box2 = new THREE.Box3().setFromObject(object2);
@@ -659,9 +665,13 @@ async function getInstructions() {
     captureText += "\n" + document.getElementById("telemetryData").value;
   }
 
+  let image_detail = document.getElementById("detail").value;
+
   const data = {
     image: await dataURL,
     text: captureText,
+    detail: image_detail
+
     //  previous_user_instruction: previous_user_instruction,
     // previous_directions: previous_directions,
     //  previous_explanation: previous_explanation,

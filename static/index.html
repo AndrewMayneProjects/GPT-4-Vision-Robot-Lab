@@ -118,7 +118,7 @@
                         </div>
                     </div>
 
-                    <button id="resetButton" style="color:white;">Reset Objects</button>
+                    <button id="resetButton" style="color:white;border: 1px solid white;margin-top: 20px;padding: 10px;">Reset Objects</button>
                    
                 </div>
 
@@ -136,13 +136,24 @@
 
                 <input id="telemetryData" class="mb-4 px-2 py-1 bg-black text-white border border-white" style="width: 100%;" placeholder="Telemetry data" value="Bot is facing East">
 
-                <div style="height: 100px; width: 100%;margin-top: 6px;">
+                <div style="height: 40px; width: 100%;margin-top: 6px;">
 
 
                     <div class="loader" hidden></div>
                     <button id="sendButton" class="bg-black text-white border border-white px-4 py-2 w-full">Send to
                         GPT-4
                         with Vision</button>
+                </div>
+
+
+                <div style="height: 100px; width: 100%;margin-top: 6px;padding: 8px 0 0 0;">
+                    <label for="detail" style="color: white;">Detail:</label>
+                    <select id="detail" name="detail" required
+                        class="focus:outline-none">
+                        <option value="auto">Auto</option>
+                        <option value="low" selected>Low</option>
+                        <option value="high">High</option>
+                    </select>
                 </div>
             </div>
         </div>
