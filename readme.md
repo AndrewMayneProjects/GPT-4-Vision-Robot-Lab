@@ -54,7 +54,7 @@ When enabled this makes the robot camera the primary view and what is sent to th
 ## Running the Application
 
 1. Start the Flask server by running `python app.py`.
-2. Access the web interface at `http://localhost:5007`.
+2. Access the web interface at `http://localhost:5005`.
 
 Open the web browser and navigate to http://localhost:5005 to view the project.
 
