@@ -45,25 +45,19 @@ When enabled this makes the robot camera the primary view and what is sent to th
 - FontLoader: A Three.js extension for loading font files
 
 
-## Getting Started
-Clone the repository:
+## Setup
 
-```
-git clone https://github.com/AndrewMayneProjects/GTP-4-Vision-Robot-Lab.git
-```
+1. Ensure Python and Flask are installed.
+2. Install required Python packages: `flask`, `requests`, `flask_cors`, `python-dotenv`, `werkzeug`.
+3. Set up an .env file with your OpenAI API key as OPENAI_API_KEY.
 
-Install the necessary dependencies:
-```
-npm install
-pip install -r requirements.txt
-```
+## Running the Application
 
-Run the Flask server:
-```
-python app.py
-```
+1. Start the Flask server by running `python app.py`.
+2. Access the web interface at `http://localhost:5007`.
 
 Open the web browser and navigate to http://localhost:5005 to view the project.
+
 
 ## Project Structure
 - templates/index.html: The main HTML file that contains the structure of the web page
