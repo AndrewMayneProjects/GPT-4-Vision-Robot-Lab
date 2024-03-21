@@ -50,15 +50,15 @@ Clone the repository:
 
 ```
 git clone https://github.com/AndrewMayneProjects/GTP-4-Vision-Robot-Lab.git
-Install the necessary dependencies:
 ```
 
+Install the necessary dependencies:
 ```
 npm install
 pip install -r requirements.txt
-Run the Flask server:
 ```
 
+Run the Flask server:
 ```
 python app.py
 ```
