@@ -61,9 +61,6 @@ Rewrite the explanation as if you are the robot making the decisions.
         + "\n\nJSON"
     )
 
-    # print("*" * 100)
-    # print(prompt)
-    # print("*" * 100)
 
     response = client.chat.completions.create(
         model="gpt-4-turbo-preview",
@@ -121,12 +118,6 @@ def getCompletion(user_prompt_data):
 
             image_counter += 1
 
-    # print("*" * 100)
-    # print("Total images:", image_counter)
-    # print("Previous directions:", previous_directions)
-    # print("*" * 100)
-
-    # os.remove(item["image"])
 
     api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -135,11 +126,11 @@ def getCompletion(user_prompt_data):
     instructions = """
 You are GPT-4 with Vision and can read images. 
     
-Return instructions for finding object using n,s,w,e.
+Return instructions for finding the object using n,s,w,e.
     
 (Example n, n, w = north 2 squares then west 1). 
     
-Acceptable direction format is n,w,e,s"
+Acceptable direction format is n,w,e,s
     """
 
     payload = {
@@ -166,11 +157,18 @@ Acceptable direction format is n,w,e,s"
         "https://api.openai.com/v1/chat/completions", headers=headers, json=payload
     )
 
+    print("-" * 100)
     json_data = response.json()
+    print("-" * 100)
+
 
     print(json_data)
 
-    input_str = json_data["choices"][0]["message"]["content"]
+    if "choices" in json_data:
+        input_str = json_data["choices"][0]["message"]["content"]
+    else:
+        input_str = "System refusal"
+        print ("Refusal:", json_data["id"])
     
     print("*" * 100)
     print(input_str)

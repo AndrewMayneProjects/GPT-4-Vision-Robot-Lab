@@ -74,3 +74,6 @@ Open the web browser and navigate to http://localhost:5005 to view the project.
 - Click the "Send" button to capture an image of the current scene along with the entered prompt
 - The captured image and prompt will be sent to the Flask server for item detection using GPT-4 with Vision
 - The detected items and any additional information will be displayed on the page
+
+## Notes
+There's partial code for using images and directions as a history for the application. This is meant as a starting point for anyonw wishing to improve upon this.
