@@ -48,17 +48,21 @@ When enabled this makes the robot camera the primary view and what is sent to th
 ## Getting Started
 Clone the repository:
 
-Copy code
+```
 git clone https://github.com/AndrewMayneProjects/GTP-4-Vision-Robot-Lab.git
 Install the necessary dependencies:
+```
 
-Copy code
+```
 npm install
 pip install -r requirements.txt
 Run the Flask server:
+```
 
-Copy code
+```
 python app.py
+```
+
 Open the web browser and navigate to http://localhost:5005 to view the project.
 
 ## Project Structure
